@@ -1,0 +1,2 @@
+# Possible options are :port, :executable, and :pidfile
+guard 'redis'
