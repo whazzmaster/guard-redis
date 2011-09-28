@@ -1,0 +1,88 @@
+require 'spec_helper'
+require 'guard/redis'
+
+describe Guard::Redis do
+  let(:guard) { described_class.new }
+
+  describe "#start" do
+    before(:each) do
+      $?.stub(:success?).and_return(true)
+    end
+
+    it "calls IO.popen and passes in the executable" do
+      IO.should_receive(:popen).with("redis-server -", "w+")
+      guard.start
+    end
+
+    it "generates the config" do
+      guard.should_receive(:config)
+      guard.start
+    end
+
+    it "writes the config to the server opened by IO" do
+      server = double(IO.pipe).as_null_object
+      server.should_receive(:write)
+      server.should_receive(:close_write)
+      IO.stub(:popen).and_yield(server)
+      guard.start
+    end
+  end
+
+  describe "#stop" do
+    it "kills the process if a pid file is found" do
+      pid = 5
+      guard.stub(:pid).and_return(pid)
+      Process.should_receive(:kill).with("TERM", pid)
+      guard.stop
+    end
+
+    it "does nothing if no pid file is found" do
+      guard.stub(:pid).and_return(false)
+      Process.should_not_receive(:kill)
+      guard.stop
+    end
+  end
+
+  describe "#reload" do
+    it "runs stop and then start" do
+      guard.should_receive(:stop).once
+      guard.should_receive(:start).once
+      guard.reload
+    end
+  end
+
+  describe "options" do
+    describe "executable" do
+      it "fetches the default executable if no option was passed in" do
+        guard.executable.should == "redis-server"
+      end
+
+      it "fetches the overridden executable if one was provided" do
+        subject = described_class.new([], { :executable => "/usr/bin/redis-server" })
+        subject.executable.should == "/usr/bin/redis-server"
+      end
+    end
+
+    describe "port" do
+      it "fetches the default port if no option was passed in" do
+        guard.port.should == 6379
+      end
+
+      it "fetches the overridden port if one was provided" do
+        subject = described_class.new([], { :port => 9999 })
+        subject.port.should == 9999
+      end
+    end
+
+    describe "pidfile path" do
+      it "fetches the default pidfile path if no option was passed in" do
+        guard.pidfile_path.should =~ /tmp\/redis.pid$/
+      end
+
+      it "fetches the overridden pidfile path if one was provided" do
+        subject = described_class.new([], { :pidfile => "/var/pid/redis.pid" })
+        subject.pidfile_path.should == "/var/pid/redis.pid"
+      end
+    end
+  end
+end
