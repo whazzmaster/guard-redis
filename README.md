@@ -10,15 +10,15 @@ Make sure you have [Guard](https://github.com/guard/guard) installed before cont
 
 Install the gem:
 
-  $ gem install guard-redis
+    $ gem install guard-redis
 
 Add it to your Gemfile.  You should really only need it in development and test environments; this gem is not meant to manage production server instances of Redis.
 
-  gem 'guard-redis'
+    gem 'guard-redis'
 
 Add the guard definition to your Guardfile by running:
 
-  $ guard init redis
+    $ guard init redis
 
 ## Options
 
