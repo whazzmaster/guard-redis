@@ -5,7 +5,9 @@ module Guard
   class Redis < Guard
     def start
       puts "Starting Redis on port #{port}"
+      @pid = nil
       IO.popen("#{executable} -", 'w+') do |server|
+        @pid = server.pid
         server.write(config)
         server.close_write
       end
@@ -17,6 +19,7 @@ module Guard
       if pid
         puts "Sending TERM signal to Redis (#{pid})"
         Process.kill("TERM", pid)
+        @pid = nil
         true
       end
     end
@@ -36,7 +39,7 @@ module Guard
 
     def pidfile_path
       options.fetch(:pidfile) {
-        File.expand_path('tmp/redis.pid', File.dirname(__FILE__))
+        File.expand_path('/tmp/redis.pid', File.dirname(__FILE__))
       }
     end
 
@@ -49,7 +52,7 @@ END
     end
 
     def pid
-      File.exist?(pidfile_path) && File.read(pidfile_path).to_i
+      (File.exist?(pidfile_path) && File.read(pidfile_path).to_i) || @pid
     end
 
     def executable

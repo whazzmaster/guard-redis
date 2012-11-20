@@ -15,14 +15,18 @@ describe Guard::Redis do
     end
 
     it "generates the config" do
-      guard.should_receive(:config)
+      guard.should_receive(:config).and_return("daemonize yes\npidfile /tmp/redis.pid\nport 6379\n")
       guard.start
+      sleep 1
+      guard.pidfile_path.should eql('/tmp/redis.pid')
+      guard.stop
     end
 
     it "writes the config to the server opened by IO" do
       server = double(IO.pipe).as_null_object
       server.should_receive(:write)
       server.should_receive(:close_write)
+      server.should_receive(:pid).and_return(9999)
       IO.stub(:popen).and_yield(server)
       guard.start
     end
