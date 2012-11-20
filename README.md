@@ -30,3 +30,7 @@ Guard::Redis doesn't watch any files; it's purpose is to ensure that redis-serve
 :port => 9999                                      # Set a custom port number the redis server is running on
 :pidfile => "/var/pid/redis.pid"                   # Set a custom path the where the pidfile is written
 ~~~~
+
+##Ccontributers
+
+https://github.com/whazzmaster/guard-redis/graphs/contributors

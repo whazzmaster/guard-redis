@@ -11,3 +11,6 @@ Gemfile.lock
 .fseventsd
 Desktop DB
 Desktop DF
+
+## IDE
+.idea
