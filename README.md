@@ -1,4 +1,4 @@
-# Guard::Redis
+# Guard::Redis [![Build Status](https://secure.travis-ci.org/whazzmaster/guard-redis.png)](http://travis-ci.org/whazzmaster/guard-redis)
 
 Redis guard manages your development [Redis](http://redis.io) server, and will automatically restart if necessary.
 
