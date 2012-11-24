@@ -29,6 +29,6 @@ platforms :jruby do
 end
 
 group :test do
-  gem 'rspec'
+  gem 'rspec', '~> 2.6'
   gem 'guard-rspec'
 end
