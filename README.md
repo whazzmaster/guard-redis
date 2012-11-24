@@ -31,6 +31,6 @@ Guard::Redis doesn't watch any files; it's purpose is to ensure that redis-serve
 :pidfile => "/var/pid/redis.pid"                   # Set a custom path the where the pidfile is written
 ~~~~
 
-##Ccontributers
+## Contributers
 
 https://github.com/whazzmaster/guard-redis/graphs/contributors
