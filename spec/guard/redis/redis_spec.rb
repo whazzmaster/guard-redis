@@ -19,7 +19,6 @@ describe Guard::Redis do
       guard.start
       sleep 1
       guard.pidfile_path.should eql('/tmp/redis.pid')
-      guard.stop
     end
 
     it "writes the config to the server opened by IO" do
