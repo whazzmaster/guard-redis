@@ -6,7 +6,7 @@ describe Guard::Redis do
 
   describe "#start" do
     before(:each) do
-      $?.stub(:success?).and_return(true)
+      guard.stub(:last_operation_succeeded?).and_return(true) 
     end
 
     it "calls IO.popen and passes in the executable" do

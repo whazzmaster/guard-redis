@@ -12,7 +12,7 @@ module Guard
         server.close_write
       end
       puts "Redis is running with PID #{pid}"
-      $?.success?
+      last_operation_succeeded?
     end
 
     def stop
@@ -61,6 +61,10 @@ END
 
     def port
       options.fetch(:port) { 6379 }
+    end
+
+    def last_operation_succeeded?
+      $?.success?
     end
   end
 end
