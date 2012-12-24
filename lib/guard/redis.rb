@@ -4,20 +4,20 @@ require 'guard/guard'
 module Guard
   class Redis < Guard
     def start
-      puts "Starting Redis on port #{port}"
+      UI.info "Starting Redis on port #{port}..."
       @pid = nil
       IO.popen("#{executable} -", 'w+') do |server|
         @pid = server.pid
         server.write(config)
         server.close_write
       end
-      puts "Redis is running with PID #{pid}"
+      UI.info "Redis is running with PID #{pid}"
       last_operation_succeeded?
     end
 
     def stop
       if pid
-        puts "Sending TERM signal to Redis (#{pid})"
+        UI.info "Sending TERM signal to Redis (#{pid})"
         Process.kill("TERM", pid)
         @pid = nil
         true
@@ -25,8 +25,10 @@ module Guard
     end
 
     def reload
+      UI.info "Reloading Redis..."
       stop
       start
+      UI.info "Redis successfully restarted."
     end
 
     def run_all
@@ -34,7 +36,7 @@ module Guard
     end
 
     def run_on_change(paths)
-      true
+      reload if reload_on_change?
     end
 
     def pidfile_path
@@ -65,6 +67,10 @@ END
 
     def last_operation_succeeded?
       $?.success?
+    end
+
+    def reload_on_change?
+      options.fetch(:reload_on_change) { false }
     end
   end
 end
