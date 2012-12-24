@@ -1,2 +1,11 @@
-# Possible options are :port, :executable, and :pidfile
+# Possible options are :port, :executable, :pidfile, and :reload_on_change
+
+# Default implementation - starts Redis on standard port and stops on exit
 guard 'redis'
+
+# Use 'redis-server' as the executable, put a PID file in the local tmp directory, run on port 6379, and reload
+# Redis when any Ruby file changes in the app, lib, or config directories.
+#
+# guard 'redis', :executable => 'redis-server', :pidfile => 'tmp/pids/redis.pid', :port => 6379, :reload_on_change => true do
+#   watch(/^(app|lib|config)\/.*\.rb$/)
+# end

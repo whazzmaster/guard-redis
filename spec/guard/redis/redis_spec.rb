@@ -55,13 +55,13 @@ describe Guard::Redis do
   end
 
   describe "#run_on_change" do
-    it "reloads the process if specifed in options" do
+    it "reloads the process if specified in options" do
       guard.stub(:reload_on_change?).and_return(true)
       guard.should_receive(:reload).once
       guard.run_on_change([])
     end
 
-    it "does not reload the process if specifed in options" do
+    it "does not reload the process if specified in options" do
       guard.stub(:reload_on_change?).and_return(false)
       guard.should_receive(:reload).never
       guard.run_on_change([])
