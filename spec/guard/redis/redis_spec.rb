@@ -6,7 +6,7 @@ describe Guard::Redis do
 
   describe "#start" do
     before(:each) do
-      guard.stub(:last_operation_succeeded?).and_return(true) 
+      guard.stub(:last_operation_succeeded?).and_return(true)
     end
 
     it "calls IO.popen and passes in the executable" do
@@ -54,6 +54,20 @@ describe Guard::Redis do
     end
   end
 
+  describe "#run_on_change" do
+    it "reloads the process if specifed in options" do
+      guard.stub(:reload_on_change?).and_return(true)
+      guard.should_receive(:reload).once
+      guard.run_on_change([])
+    end
+
+    it "does not reload the process if specifed in options" do
+      guard.stub(:reload_on_change?).and_return(false)
+      guard.should_receive(:reload).never
+      guard.run_on_change([])
+    end
+  end
+
   describe "options" do
     describe "executable" do
       it "fetches the default executable if no option was passed in" do
@@ -85,6 +99,17 @@ describe Guard::Redis do
       it "fetches the overridden pidfile path if one was provided" do
         subject = described_class.new([], { :pidfile => "/var/pid/redis.pid" })
         subject.pidfile_path.should == "/var/pid/redis.pid"
+      end
+    end
+
+    describe "reload_on_change" do
+      it "fetches the default reload_on_change if no options was passed in" do
+        guard.reload_on_change?.should == false
+      end
+
+      it "fetches the overridden reload_on_change if one was provided" do
+        subject = described_class.new([], { :reload_on_change => true })
+        subject.reload_on_change?.should == true
       end
     end
   end
