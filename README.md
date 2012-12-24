@@ -22,13 +22,17 @@ Add the guard definition to your Guardfile by running:
 
 ## Options
 
-Guard::Redis doesn't watch any files; it's purpose is to ensure that redis-server is running while you're coding and testing.  It does take several options related to configuration of the redis server.
+The main purpose of Guard::Redis is to ensure that redis-server is running while you're coding and testing. It can optionally monitor a set of files and reload the process (useful if you're frequently changing code that affects items in Redis).
+
+It takes several options related to its configuration.
 
 ### List of available options
 ~~~~ruby
-:executable => "/path/to/redis/server/executable"  # Set the custom path to the redis server executable
-:port => 9999                                      # Set a custom port number the redis server is running on
+:executable => "/path/to/redis/server/executable"  # Set the custom path to the Redis server executable
+:port => 9999                                      # Set a custom port number the Redis server is running on
 :pidfile => "/var/pid/redis.pid"                   # Set a custom path the where the pidfile is written
+:reload_on_change => false                         # Reload Redis if any of the specified files change. Note that you
+                                                   # must specify this option in addition to passing a block to Guard.
 ~~~~
 
 ## Contributers
