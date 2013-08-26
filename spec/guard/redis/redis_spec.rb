@@ -112,5 +112,64 @@ describe Guard::Redis do
         subject.reload_on_change?.should == true
       end
     end
+
+    describe "capture_logging" do
+      it "fetches the default capture_logging if no options was passed in" do
+        guard.capture_logging?.should == false
+      end
+
+      it "fetches the overridden capture_logging if one was provided" do
+        subject = described_class.new([], { :capture_logging => true })
+        subject.capture_logging?.should == true
+      end
+    end
+
+    describe "logfile" do
+      it "fetches the default logfile if no options was passed in" do
+        guard.logfile.should == "stdout"
+      end
+
+      it "fetches the overridden logfile if one was provided" do
+        subject = described_class.new([], { :logfile => "log/redis.log" })
+        subject.logfile.should == "log/redis.log"
+      end
+
+      it "fetches the standard logfile if capture_logging is enabled" do
+        subject = described_class.new([], { :capture_logging => true })
+        subject.logfile.should == "log/redis_6379.log"
+      end
+
+      it "fetches the logfile with port if set and capture_logging is enabled" do
+        subject = described_class.new([], { :capture_logging => true, :port => 9999 })
+        subject.logfile.should == "log/redis_9999.log"
+      end
+
+      it "should appear in the config if capture_logging is enabled " do
+        subject = described_class.new([], { :capture_logging => true, :logfile => 'log/redis.log' })
+        subject.config.should == "daemonize yes\npidfile /tmp/redis.pid\nport 6379\nlogfile log/redis.log"
+      end
+    end
+
+    describe "shutdown_retries" do
+      it "fetches the default shutdown_retries if no options was passed in" do
+        guard.shutdown_retries.should == 0
+      end
+
+      it "fetches the overridden shutdown_retries if one was provided" do
+        subject = described_class.new([], { :shutdown_retries => 3 })
+        subject.shutdown_retries.should == 3
+      end
+    end
+
+    describe "shutdown_wait" do
+      it "fetches the default shutdown_wait if no options was passed in" do
+        guard.shutdown_wait.should == 0
+      end
+
+      it "fetches the overridden shutdown_retries if one was provided" do
+        subject = described_class.new([], { :shutdown_wait => 5 })
+        subject.shutdown_wait.should == 5
+      end
+    end
   end
 end
