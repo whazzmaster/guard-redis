@@ -3,6 +3,9 @@ pkg/*
 .bundle
 Gemfile.lock
 *.rbc
+.rvmrc
+.ruby-version
+.ruby-gemset
 
 ## MAC OS
 .DS_Store
