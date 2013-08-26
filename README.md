@@ -33,8 +33,16 @@ It takes several options related to its configuration.
 :pidfile => "/var/pid/redis.pid"                   # Set a custom path the where the pidfile is written
 :reload_on_change => false                         # Reload Redis if any of the specified files change. Note that you
                                                    # must specify this option in addition to passing a block to Guard.
+:capture_logging => true                           # Enables logging to :logfile
+:logfile => "log/redis_#{port}.log"                # Set a custom path where logs from Redis are written
+                                                   # Since by default the output from Redis goes to the ether, these options
+                                                   # let you redirect logging to a file to assist with debugging crashes
+:shutdown_retries => 3                             # Set a number of times to retry
+:shutdown_wait => 5                                # Set a number of seconds to wait between retries
+                                                   # Sometimes Redis takes more than a moment to shut down and you can use
+                                                   # these options to ensure it does so cleanly before reloading with :reload_on_change.
 ~~~~
 
-## Contributers
+## Contributors
 
 https://github.com/whazzmaster/guard-redis/graphs/contributors

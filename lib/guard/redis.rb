@@ -16,12 +16,9 @@ module Guard
     end
 
     def stop
-      if pid
-        UI.info "Sending TERM signal to Redis (#{pid})"
-        Process.kill("TERM", pid)
-        @pid = nil
-        true
-      end
+      shutdown_redis
+      @pid = nil
+      true
     end
 
     def reload
@@ -39,6 +36,21 @@ module Guard
       reload if reload_on_change?
     end
 
+    def shutdown_redis
+      return UI.info "No instance of Redis to stop." unless pid
+      return UI.info "Redis (#{pid}) was already stopped." unless process_running?
+      UI.info "Sending TERM signal to Redis (#{pid})..."
+      Process.kill("TERM", pid)
+
+      return if shutdown_retries == 0
+      shutdown_retries.times do
+        return UI.info "Redis stopped." unless process_running?
+        UI.info "Redis is still shutting down. Retrying in #{ shutdown_wait } second(s)..."
+        sleep shutdown_wait
+      end
+      UI.error "Redis didn't shut down after #{ shutdown_retries * shutdown_wait } second(s)."
+    end
+
     def pidfile_path
       options.fetch(:pidfile) {
         File.expand_path('/tmp/redis.pid', File.dirname(__FILE__))
@@ -46,11 +58,13 @@ module Guard
     end
 
     def config
-      <<"END"
+      result = <<"END"
 daemonize yes
 pidfile #{pidfile_path}
 port #{port}
 END
+      result << "logfile #{logfile}" if capture_logging?
+      result
     end
 
     def pid
@@ -65,12 +79,39 @@ END
       options.fetch(:port) { 6379 }
     end
 
+    def logfile
+      options.fetch(:logfile) {
+        if capture_logging? then "log/redis_#{port}.log" else 'stdout' end
+      }
+    end
+
+    def shutdown_retries
+      options.fetch(:shutdown_retries) { 0 }
+    end
+
+    def shutdown_wait
+      options.fetch(:shutdown_wait) { 0 }
+    end
+
     def last_operation_succeeded?
       $?.success?
     end
 
     def reload_on_change?
       options.fetch(:reload_on_change) { false }
+    end
+
+    def process_running?
+      begin
+        Process.getpgid pid
+        true
+      rescue Errno::ESRCH
+        false
+      end
+    end
+
+    def capture_logging?
+      options.fetch(:capture_logging) { false }
     end
   end
 end
