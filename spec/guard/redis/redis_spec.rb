@@ -35,6 +35,7 @@ describe Guard::Redis do
     it "kills the process if a pid file is found" do
       pid = 5
       guard.stub(:pid).and_return(pid)
+      guard.stub(:process_running?).and_return(true)
       Process.should_receive(:kill).with("TERM", pid)
       guard.stop
     end
