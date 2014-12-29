@@ -1,8 +1,7 @@
-require 'guard'
-require 'guard/guard'
+require 'guard/compat/plugin'
 
 module Guard
-  class Redis < Guard
+  class Redis < Plugin
     def start
       UI.info "Starting Redis on port #{port}..."
       @pid = nil

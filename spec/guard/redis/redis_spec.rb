@@ -6,27 +6,27 @@ describe Guard::Redis do
 
   describe "#start" do
     before(:each) do
-      guard.stub(:last_operation_succeeded?).and_return(true)
+      allow(guard).to receive(:last_operation_succeeded?).and_return(true)
     end
 
     it "calls IO.popen and passes in the executable" do
-      IO.should_receive(:popen).with("redis-server -", "w+")
+      expect(IO).to receive(:popen).with("redis-server -", "w+")
       guard.start
     end
 
     it "generates the config" do
-      guard.should_receive(:config).and_return("daemonize yes\npidfile /tmp/redis.pid\nport 6379\n")
+      expect(guard).to receive(:config).and_return("daemonize yes\npidfile /tmp/redis.pid\nport 6379\n")
       guard.start
       sleep 1
-      guard.pidfile_path.should eql('/tmp/redis.pid')
+      expect(guard.pidfile_path).to eql('/tmp/redis.pid')
     end
 
     it "writes the config to the server opened by IO" do
       server = double(IO.pipe).as_null_object
-      server.should_receive(:write)
-      server.should_receive(:close_write)
-      server.should_receive(:pid).and_return(9999)
-      IO.stub(:popen).and_yield(server)
+      expect(server).to receive(:write)
+      expect(server).to receive(:close_write)
+      expect(server).to receive(:pid).and_return(9999)
+      allow(IO).to receive(:popen).and_yield(server)
       guard.start
     end
   end
@@ -34,37 +34,37 @@ describe Guard::Redis do
   describe "#stop" do
     it "kills the process if a pid file is found" do
       pid = 5
-      guard.stub(:pid).and_return(pid)
-      guard.stub(:process_running?).and_return(true)
-      Process.should_receive(:kill).with("TERM", pid)
+      allow(guard).to receive(:pid).and_return(pid)
+      allow(guard).to receive(:process_running?).and_return(true)
+      expect(Process).to receive(:kill).with("TERM", pid)
       guard.stop
     end
 
     it "does nothing if no pid file is found" do
-      guard.stub(:pid).and_return(false)
-      Process.should_not_receive(:kill)
+      allow(guard).to receive(:pid).and_return(false)
+      expect(Process).not_to receive(:kill)
       guard.stop
     end
   end
 
   describe "#reload" do
     it "runs stop and then start" do
-      guard.should_receive(:stop).once
-      guard.should_receive(:start).once
+      expect(guard).to receive(:stop).once
+      expect(guard).to receive(:start).once
       guard.reload
     end
   end
 
   describe "#run_on_change" do
     it "reloads the process if specified in options" do
-      guard.stub(:reload_on_change?).and_return(true)
-      guard.should_receive(:reload).once
+      allow(guard).to receive(:reload_on_change?).and_return(true)
+      expect(guard).to receive(:reload).once
       guard.run_on_change([])
     end
 
     it "does not reload the process if specified in options" do
-      guard.stub(:reload_on_change?).and_return(false)
-      guard.should_receive(:reload).never
+      allow(guard).to receive(:reload_on_change?).and_return(false)
+      expect(guard).to receive(:reload).never
       guard.run_on_change([])
     end
   end
@@ -72,104 +72,139 @@ describe Guard::Redis do
   describe "options" do
     describe "executable" do
       it "fetches the default executable if no option was passed in" do
-        guard.executable.should == "redis-server"
+        expect(guard.executable).to eql("redis-server")
       end
 
       it "fetches the overridden executable if one was provided" do
-        subject = described_class.new([], { :executable => "/usr/bin/redis-server" })
-        subject.executable.should == "/usr/bin/redis-server"
+        subject = described_class.new({
+          watchers: [],
+          executable: "/usr/bin/redis-server"
+        })
+        expect(subject.executable).to eql("/usr/bin/redis-server")
       end
     end
 
     describe "port" do
       it "fetches the default port if no option was passed in" do
-        guard.port.should == 6379
+        expect(guard.port).to eq(6379)
       end
 
       it "fetches the overridden port if one was provided" do
-        subject = described_class.new([], { :port => 9999 })
-        subject.port.should == 9999
+        subject = described_class.new({
+          watchers: [],
+          port: 9999
+        })
+        expect(subject.port).to eq(9999)
       end
     end
 
     describe "pidfile path" do
       it "fetches the default pidfile path if no option was passed in" do
-        guard.pidfile_path.should =~ /tmp\/redis.pid$/
+        expect(guard.pidfile_path).to match(/tmp\/redis.pid$/)
       end
 
       it "fetches the overridden pidfile path if one was provided" do
-        subject = described_class.new([], { :pidfile => "/var/pid/redis.pid" })
-        subject.pidfile_path.should == "/var/pid/redis.pid"
+        subject = described_class.new({
+          watchers: [],
+          pidfile: "/var/pid/redis.pid"
+        })
+        expect(subject.pidfile_path).to eql("/var/pid/redis.pid")
       end
     end
 
     describe "reload_on_change" do
       it "fetches the default reload_on_change if no options was passed in" do
-        guard.reload_on_change?.should == false
+        expect(guard.reload_on_change?).to be(false)
       end
 
       it "fetches the overridden reload_on_change if one was provided" do
-        subject = described_class.new([], { :reload_on_change => true })
-        subject.reload_on_change?.should == true
+        subject = described_class.new({
+          watchers: [],
+          reload_on_change: true
+        })
+        expect(subject.reload_on_change?).to be(true)
       end
     end
 
     describe "capture_logging" do
       it "fetches the default capture_logging if no options was passed in" do
-        guard.capture_logging?.should == false
+        expect(guard.capture_logging?).to be(false)
       end
 
       it "fetches the overridden capture_logging if one was provided" do
-        subject = described_class.new([], { :capture_logging => true })
-        subject.capture_logging?.should == true
+        subject = described_class.new({
+          watchers: [],
+          capture_logging: true
+        })
+        expect(subject.capture_logging?).to be(true)
       end
     end
 
     describe "logfile" do
       it "fetches the default logfile if no options was passed in" do
-        guard.logfile.should == "stdout"
+        expect(guard.logfile).to eql("stdout")
       end
 
       it "fetches the overridden logfile if one was provided" do
-        subject = described_class.new([], { :logfile => "log/redis.log" })
-        subject.logfile.should == "log/redis.log"
+        subject = described_class.new({
+          watchers: [],
+          logfile: "log/redis.log"
+        })
+        expect(subject.logfile).to eql("log/redis.log")
       end
 
       it "fetches the standard logfile if capture_logging is enabled" do
-        subject = described_class.new([], { :capture_logging => true })
-        subject.logfile.should == "log/redis_6379.log"
+        subject = described_class.new({
+          watchers: [],
+          capture_logging: true
+        })
+        expect(subject.logfile).to eql("log/redis_6379.log")
       end
 
       it "fetches the logfile with port if set and capture_logging is enabled" do
-        subject = described_class.new([], { :capture_logging => true, :port => 9999 })
-        subject.logfile.should == "log/redis_9999.log"
+        subject = described_class.new({
+          watchers: [],
+          capture_logging: true,
+          port: 9999
+        })
+        expect(subject.logfile).to eql("log/redis_9999.log")
       end
 
       it "should appear in the config if capture_logging is enabled " do
-        subject = described_class.new([], { :capture_logging => true, :logfile => 'log/redis.log' })
-        subject.config.should == "daemonize yes\npidfile /tmp/redis.pid\nport 6379\nlogfile log/redis.log"
+        subject = described_class.new({
+          watchers: [],
+          capture_logging: true,
+          logfile: 'log/redis.log'
+        })
+        expect(subject.config).to eql("daemonize yes\npidfile /tmp/redis.pid\nport 6379\nlogfile log/redis.log")
       end
     end
 
     describe "shutdown_retries" do
       it "fetches the default shutdown_retries if no options was passed in" do
-        guard.shutdown_retries.should == 0
+        expect(guard.shutdown_retries).to be(0)
       end
 
       it "fetches the overridden shutdown_retries if one was provided" do
-        subject = described_class.new([], { :shutdown_retries => 3 })
-        subject.shutdown_retries.should == 3
+        subject = described_class.new({
+          watchers: [],
+          shutdown_retries: 3
+        })
+        expect(subject.shutdown_retries).to be(3)
       end
     end
 
     describe "shutdown_wait" do
       it "fetches the default shutdown_wait if no options was passed in" do
-        guard.shutdown_wait.should == 0
+        expect(guard.shutdown_wait).to be(0)
       end
 
       it "fetches the overridden shutdown_retries if one was provided" do
-        subject = described_class.new([], { :shutdown_wait => 5 })
-        subject.shutdown_wait.should == 5
+        subject = described_class.new({
+          watchers: [],
+          shutdown_wait: 5
+        })
+        expect(subject.shutdown_wait).to be(5)
       end
     end
   end
