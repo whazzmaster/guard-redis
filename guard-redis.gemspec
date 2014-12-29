@@ -14,12 +14,13 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = '>= 1.3.6'
 
-  s.add_dependency 'guard', '>= 0.4.0'
-  s.add_dependency 'redis', '>= 2.2.2'
+  s.add_dependency 'rake'
+  s.add_dependency 'guard',        '>= 2.10'
+  s.add_dependency 'guard-compat', '~> 1.2'
+  s.add_dependency 'redis',        '>= 2.2'
 
-  s.add_development_dependency 'bundler', '~> 1.0'
-  s.add_development_dependency 'rspec',   '~> 2.6'
-  s.add_development_dependency 'guard-rspec'
+  s.add_development_dependency 'bundler',  '>= 1.7'
+  s.add_development_dependency 'rspec',    '~> 3.1'
 
   s.files        = Dir.glob('{lib}/**/*') + %w[LICENSE README.md]
   s.require_path = 'lib'
