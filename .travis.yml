@@ -1,8 +1,6 @@
 script: bundle exec rake spec
 rvm:
-  - 1.9.2
   - 1.9.3
   - 2.1
-  - 2.2-head
   - jruby
   - rbx
