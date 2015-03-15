@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'rake'
   s.add_dependency 'guard',        '~> 2.8'
   s.add_dependency 'guard-compat', '~> 1.2'
-  s.add_dependency 'redis',        '~> 2.2'
+  s.add_dependency 'redis'
 
   s.add_development_dependency 'bundler',  '>= 1.7'
   s.add_development_dependency 'rspec',    '~> 3.1'
