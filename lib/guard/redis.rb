@@ -4,9 +4,7 @@ module Guard
   class Redis < Plugin
     def start
       UI.info "Starting Redis on port #{port}..."
-      @pid = nil
       IO.popen("#{executable} -", 'w+') do |server|
-        @pid = server.pid
         server.write(config)
         server.close_write
       end
@@ -16,7 +14,6 @@ module Guard
 
     def stop
       shutdown_redis
-      @pid = nil
       true
     end
 
@@ -67,7 +64,11 @@ END
     end
 
     def pid
-      (File.exist?(pidfile_path) && File.read(pidfile_path).to_i) || @pid
+      unless File.exists? pidfile_path
+        UI.info 'Waiting for pidfile to appear...'
+        sleep 1
+      end
+      File.read(pidfile_path).to_i
     end
 
     def executable
