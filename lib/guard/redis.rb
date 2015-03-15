@@ -20,7 +20,7 @@ module Guard
     end
 
     def stop
-      if @started
+      if redis_started?
         shutdown_redis
         true
       else
@@ -42,6 +42,10 @@ module Guard
 
     def run_on_change(paths)
       reload if reload_on_change?
+    end
+
+    def redis_started?
+      @started
     end
 
     def shutdown_redis

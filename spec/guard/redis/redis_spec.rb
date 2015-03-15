@@ -25,7 +25,6 @@ describe Guard::Redis do
       server = double(IO.pipe).as_null_object
       expect(server).to receive(:write)
       expect(server).to receive(:close_write)
-      expect(server).to receive(:pid).and_return(9999)
       allow(IO).to receive(:popen).and_yield(server)
       guard.start
     end
@@ -34,6 +33,7 @@ describe Guard::Redis do
   describe "#stop" do
     it "kills the process if a pid file is found" do
       pid = 5
+      allow(guard).to receive(:redis_started?).and_return(true)
       allow(guard).to receive(:pid).and_return(pid)
       allow(guard).to receive(:process_running?).and_return(true)
       expect(Process).to receive(:kill).with("TERM", pid)
