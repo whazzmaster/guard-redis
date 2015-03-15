@@ -38,7 +38,7 @@ It takes several options related to its configuration.
 
 ### List of available options
 ~~~~ruby
-:executable => "/path/to/redis/server/executable"  # Set the custom path to the Redis server executable
+:executable => "/path/to/redis-server/executable"  # Set the custom path to the Redis server executable
 :port => 9999                                      # Set a custom port number the Redis server is running on
 :pidfile => "/var/pid/redis.pid"                   # Set a custom path the where the pidfile is written
 :reload_on_change => false                         # Reload Redis if any of the specified files change. Note that you
@@ -52,6 +52,15 @@ It takes several options related to its configuration.
                                                    # Sometimes Redis takes more than a moment to shut down and you can use
                                                    # these options to ensure it does so cleanly before reloading with :reload_on_change.
 ~~~~
+
+### Pidfile location must be writable
+Starting with version 2.0.0, the pidfile location you specify or the *default*
+location (`/tmp/redis.pid`) if you don't specify **must be writable** or
+guard-redis will fail to start.
+
+**If you specify a pidfile location via the configuration and the directory path
+doesn't exist, guard-redis will attempt to create it**. If it cannot write to that
+directory, you will see an error and redis will fail to start.
 
 ## Contributors
 Thanks so much to [all who have contributed](https://github.com/whazzmaster/guard-redis/graphs/contributors)!
