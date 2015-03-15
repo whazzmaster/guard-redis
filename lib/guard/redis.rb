@@ -3,18 +3,30 @@ require 'guard/compat/plugin'
 module Guard
   class Redis < Plugin
     def start
-      UI.info "Starting Redis on port #{port}..."
-      IO.popen("#{executable} -", 'w+') do |server|
-        server.write(config)
-        server.close_write
+      @started = false
+      begin
+        ensure_pidfile_directory
+        UI.info "Starting Redis on port #{port}..."
+        IO.popen("#{executable} -", 'w+') do |server|
+          server.write(config)
+          server.close_write
+        end
+        UI.info "Redis is running with PID #{pid}"
+        @started = last_operation_succeeded?
+      rescue ::Exception => err
+        UI.error "Redis not started due to errors: #{err}"
       end
-      UI.info "Redis is running with PID #{pid}"
-      last_operation_succeeded?
+      @started
     end
 
     def stop
-      shutdown_redis
-      true
+      if @started
+        shutdown_redis
+        true
+      else
+        UI.info "Redis never started. No need to shutdown."
+        true
+      end
     end
 
     def reload
@@ -53,8 +65,20 @@ module Guard
       }
     end
 
+    def ensure_pidfile_directory
+      pidfile_dir = File.dirname(pidfile_path)
+      unless Dir.exist? pidfile_dir
+        UI.info "Creating pidfie directory #{pidfile_dir}"
+        FileUtils.mkdir_p pidfile_dir
+      end
+
+      unless File.writable? pidfile_dir
+        raise "no write access to pidfile directory #{pidfile_dir}"
+      end
+    end
+
     def config
-      result = <<"END"
+      result = <<END
 daemonize yes
 pidfile #{pidfile_path}
 port #{port}
@@ -64,8 +88,15 @@ END
     end
 
     def pid
-      unless File.exists? pidfile_path
-        UI.info 'Waiting for pidfile to appear...'
+      count = 0
+      loop do
+        if count > 5
+          raise "pidfile was never written to #{pidfile_path}"
+        end
+
+        break if File.exists? pidfile_path
+        UI.info "Waiting for pidfile to appear at #{pidfile_path}..."
+        count += 1
         sleep 1
       end
       File.read(pidfile_path).to_i
