@@ -56,7 +56,10 @@ module Guard
 
       return if shutdown_retries == 0
       shutdown_retries.times do
-        return UI.info "Redis stopped." unless process_running?
+        unless process_running?
+          @pid = nil
+          return UI.info "Redis stopped."
+        end
         UI.info "Redis is still shutting down. Retrying in #{ shutdown_wait } second(s)..."
         sleep shutdown_wait
       end
@@ -92,6 +95,7 @@ END
     end
 
     def pid
+      return @pid if @pid
       count = 0
       loop do
         if count > 5
@@ -103,7 +107,7 @@ END
         count += 1
         sleep 1
       end
-      File.read(pidfile_path).to_i
+      @pid = File.read(pidfile_path).to_i
     end
 
     def executable
