@@ -10,6 +10,7 @@ module Guard
         IO.popen("#{executable} -", 'w+') do |server|
           server.write(config)
           server.close_write
+          server.read
         end
         UI.info "Redis is running with PID #{pid}"
         @started = last_operation_succeeded?
